@@ -1,0 +1,33 @@
+{
+  "name": "zero-s3",
+  "version": "0.0.1",
+  "description": "zmq+http to s3 upload",
+  "main": "server.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ironsource/zero-s3.git"
+  },
+  "keywords": [
+    "s3",
+    "upload",
+    "zmq",
+    "zeromq"
+  ],
+  "author": "Yaniv Kessler",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ironsource/zero-s3/issues"
+  },
+  "dependencies": {
+    "rc": "~0.3.1",
+    "zmq": "~2.5.1",
+    "knox": "~0.8.6",
+    "optimist": "~0.6.0",
+    "lru-cache": "~2.3.1",
+    "forkraft": "~1.1.10",
+    "lodash": "~2.2.1"
+  }
+}
