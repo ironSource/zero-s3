@@ -21,7 +21,7 @@ var KnoxS3ClientProvider = require('./lib/KnoxS3ClientProvider.js');
 
 var clientProvider = new KnoxS3ClientProvider(config.lru, config.aws);
 
-function putCallback(err, response) {
+function putCallback(err) {
 	if (err) console.error(err);
 }
 
@@ -36,19 +36,26 @@ incomingChannel.on('message', function(message) {
 		return;
 	}
 
-	if (message.url || message.data) {
+	if (message.url || message.data || message.path) {
 
 		var client = clientProvider.get(message.bucket);
 
 		if (message.data) {
 			client.put(message.key, message.data, putCallback);
+		} else if (message.url) {
+			throw new Error('not implemented')
+			//getMessageAndUpload(client, message);
+		} else if (message.path) {
+
+			client.putFile(message.key, message.path, putCallback);
+
 		} else {
-			getMessageAndUpload(client, message);
+			throw new Error('imaginary universe!');
 		}
 
 	} else {
 
-		console.error('dropping message (missing url or data):\n%s\n\n', $u.inspect(message.toString(config.messageEncoding)));
+		console.error('dropping message (missing url or data or path):\n%s\n\n', $u.inspect(message.toString(config.messageEncoding)));
 		return;
 	}
 });

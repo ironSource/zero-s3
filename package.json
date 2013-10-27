@@ -2,7 +2,10 @@
   "name": "zero-s3",
   "version": "0.0.1",
   "description": "zmq+http to s3 upload",
-  "main": "server.js",
+  "main": "index.js",
+  "bin": {
+    "zero-s3": "./zero-s3.js"
+  },
   "scripts": {
     "test": "mocha"
   },
