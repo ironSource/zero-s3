@@ -2,6 +2,7 @@ var zmq = require('zmq');
 var config = require('./lib/config.js');
 var $u = require('util');
 var http = require('http');
+var decrypt = require('./lib/decrypt.js');
 
 var incomingChannel = zmq.socket('pull');
 incomingChannel.identity = 'zero-s3' + process.pid;
@@ -26,6 +27,9 @@ function putCallback(err) {
 }
 
 incomingChannel.on('message', function(message) {
+
+	message = JSON.parse(decrypt(message));
+
 	if (!message.bucket) {
 		console.error('dropping message (missing bucket):\n%s\n\n', $u.inspect(message.toString(config.messageEncoding)));
 		return;
