@@ -22,7 +22,7 @@ var KnoxS3ClientProvider = require('./lib/KnoxS3ClientProvider.js');
 
 var clientProvider = new KnoxS3ClientProvider(config.lru, config.aws);
 
-function putCallback(err) {
+function putCallback(err, res) {
 	if (err) console.error(err);
 }
 
