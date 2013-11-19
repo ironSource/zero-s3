@@ -23,7 +23,10 @@ var KnoxS3ClientProvider = require('./lib/KnoxS3ClientProvider.js');
 var clientProvider = new KnoxS3ClientProvider(config.lru, config.aws);
 
 function putCallback(err, res) {
-	if (err) console.error(err);
+	if (err) {
+		console.error(err);
+		printResponse(res);
+	}
 }
 
 incomingChannel.on('message', function(message) {
@@ -63,5 +66,23 @@ incomingChannel.on('message', function(message) {
 		return;
 	}
 });
+
+function printResponse(response) {
+
+	function readMore() {
+		var result = response.read();
+
+		if (result) {
+			response.data += result;
+			readMore();
+		}
+	}
+
+	response.on('readable', readMore);
+
+	response.on('end', function () {
+		console.log(response.data);
+	});
+}
 
 console.log('zero-s3 worker started (pid: %s)', process.pid);
