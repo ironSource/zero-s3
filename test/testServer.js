@@ -12,7 +12,7 @@ function send() {
 
 	var message = {
 		bucket: 'rtb-redshift',
-		key: '1',
+		key: 'test/1',
 		path: path.join(__dirname, 'uploadtestfile')
 	}
 
