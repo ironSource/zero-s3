@@ -5,7 +5,7 @@ outgoingWorkChannel.identity = 'loggerToZeroS3' + process.pid;
 outgoingWorkChannel.bind('tcp://127.0.0.1:5003');
 
 
-setTimeout(send, 5000);
+setTimeout(send, 1000);
 
 
 function send() {
