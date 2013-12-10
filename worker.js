@@ -57,7 +57,7 @@ incomingChannel.on('message', function(message) {
 			client.putFile(message.key, message.path, putCallback);
 
 		} else {
-			throw new Error('imaginary universe!');
+			console.error('dropping message (missing any field that will indicate what to do with this message [data, url, path]):\n%s\n\n', $u.inspect(message.toString(config.messageEncoding)));
 		}
 
 	} else {
