@@ -53,6 +53,8 @@ function printResponse(response) {
 
 	if (!response) return;
 
+	response.data = '';
+
 	function readMore() {
 		var result = response.read();
 

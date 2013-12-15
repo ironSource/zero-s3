@@ -27,12 +27,15 @@
   "dependencies": {
     "rc": "~0.3.1",
     "zmq": "~2.5.1",
-    "knox": "~0.8.6",
+    "knox": "~0.8.8",
     "optimist": "~0.6.0",
     "lru-cache": "~2.3.1",
     "forkraft": "~1.1.10",
     "lodash": "~2.2.1",
     "async": "~0.2.9",
     "simple-file-writer": "~1.0.9"
+  },
+  "devDependencies": {
+    "knox": "~0.8.8"
   }
 }
