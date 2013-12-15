@@ -1,6 +1,6 @@
 {
   "name": "zero-s3",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "zmq+http to s3 upload",
   "main": "index.js",
   "bin": {
@@ -32,6 +32,7 @@
     "lru-cache": "~2.3.1",
     "forkraft": "~1.1.10",
     "lodash": "~2.2.1",
-    "async": "~0.2.9"
+    "async": "~0.2.9",
+    "simple-file-writer": "~1.0.9"
   }
 }

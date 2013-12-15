@@ -1,8 +1,11 @@
 var zmq = require('zmq');
 var config = require('./lib/config.js');
 var $u = require('util');
+var Message = require('./lib/Message.js');
 var http = require('http');
 var decrypt = require('./lib/decrypt.js');
+var SimpleFileWriter = require('simple-file-writer');
+var KnoxS3ClientProvider = require('./lib/KnoxS3ClientProvider.js');
 
 var incomingChannel = zmq.socket('pull');
 incomingChannel.identity = 'zero-s3' + process.pid;
@@ -17,57 +20,38 @@ for (var i = 0; i < config.fileLoggers.length; i++) {
 	connectChannel(config.fileLoggers[i]);
 }
 
-
-var KnoxS3ClientProvider = require('./lib/KnoxS3ClientProvider.js');
-
 var clientProvider = new KnoxS3ClientProvider(config.lru, config.aws);
 
-function putCallback(err, res) {
+function putCallback(err, res, message) {
 	if (err) {
 		console.error(err);
 		printResponse(res);
+
+		if (message.uploads < config.uploadRetries) {
+			upload(message);
+		}
 	}
 }
 
-incomingChannel.on('message', function(message) {
+incomingChannel.on('message', handleMessage);
 
-	message = JSON.parse(decrypt(message));
-
-	if (!message.bucket) {
-		console.error('dropping message (missing bucket):\n%s\n\n', $u.inspect(message.toString(config.messageEncoding)));
-		return;
+function handleMessage(payload) {
+	try {
+		payload = JSON.parse(decrypt(payload));
+		upload(new Message(payload));
+	} catch (e) {
+		console.error('dropping message %s due to %s', $u.inspect(payload), $u.inspect(e));
 	}
+}
 
-	if (!message.key) {
-		console.error('dropping message (missing key):\n%s\n\n', $u.inspect(message.toString(config.messageEncoding)));
-		return;
-	}
-
-	if (message.url || message.data || message.path) {
-
-		var client = clientProvider.get(message.bucket);
-
-		if (message.data) {
-			client.put(message.key, message.data, putCallback);
-		} else if (message.url) {
-			throw new Error('not implemented')
-			//getMessageAndUpload(client, message);
-		} else if (message.path) {
-
-			client.putFile(message.key, message.path, putCallback);
-
-		} else {
-			console.error('dropping message (missing any field that will indicate what to do with this message [data, url, path]):\n%s\n\n', $u.inspect(message.toString(config.messageEncoding)));
-		}
-
-	} else {
-
-		console.error('dropping message (missing url or data or path):\n%s\n\n', $u.inspect(message.toString(config.messageEncoding)));
-		return;
-	}
-});
+function upload (message) {
+	var client = clientProvider.get(message.payload.bucket);
+	message.upload(client, putCallback);
+}
 
 function printResponse(response) {
+
+	if (!response) return;
 
 	function readMore() {
 		var result = response.read();
