@@ -5,6 +5,7 @@ var Message = require('./lib/Message.js');
 var http = require('http');
 var decrypt = require('./lib/decrypt.js');
 var S3ClientProviderSelector = require('./lib/S3ClientProviderSelector.js');
+var domain = require('domain');
 
 var incomingChannel = zmq.socket('pull');
 incomingChannel.identity = 'zero-s3' + process.pid;
@@ -21,6 +22,7 @@ var clientProvider = new ClientProviderClass(config);
 
 function putCallback(err, res, message) {
 	if (err) {
+
 		console.error(err);
 		printResponse(res);
 

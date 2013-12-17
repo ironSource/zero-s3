@@ -21,6 +21,7 @@ var server = {
 			bucket: bucket,
 			key: key,
 			path: path.join(__dirname, 'uploadtestfile')
+			//data: '123'
 		};
 
 		console.log('test server: sending %s to zero s3 worker', $u.inspect(message));

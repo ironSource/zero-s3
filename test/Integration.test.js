@@ -6,6 +6,7 @@ var fs = require('fs');
 var knox = require('knox');
 var assert = require('assert');
 var fs = require('fs');
+var fork = require('./fork.js');
 
 var workerPath = path.resolve(__dirname, '..', 'worker.js');
 var testServerPath = path.join(__dirname, 'testServer.js');
@@ -64,7 +65,7 @@ describe('zeros3', function () {
 		}
 	});
 
-	it('retries the upload when it fails', function (done) {
+	it.skip('retries the upload when it fails', function (done) {
 		this.timeout(60000);
 
 		async.waterfall([
@@ -241,10 +242,4 @@ function clearLocalData(services, callback) {
 		if (err) callback(err);
 		else callback(null, services);
 	});
-}
-
-
-
-function fork(what, args) {
-	return child.fork(what, process.argv.slice(3).concat(args),  { cwd: process.cwd() });
 }
