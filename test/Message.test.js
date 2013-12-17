@@ -25,7 +25,6 @@ describe('Message', function () {
 				var invocation = client.invocations[0];
 				assert.strictEqual(invocation[0], 'put');
 				assert.strictEqual(invocation[1][1], '123');
-				assert.strictEqual(message.uploads, 1);
 				done();
 			});
 		});
@@ -45,7 +44,25 @@ describe('Message', function () {
 
 				assert.strictEqual(invocation[0], 'putFile');
 				assert.strictEqual(invocation[1][1], '123');
-				assert.strictEqual(message.uploads, 1);
+
+				done();
+			});
+		});
+
+		it('increment upload attemps counter when upload fails', function (done) {
+			var client = new Mock();
+
+			client.put = function(k, d, c) {
+				c('error!');
+			}
+
+			var payload = { data: '123' };
+
+			var message = new Message(payload);
+
+			message.upload(client, function(err) {
+
+				assert.strictEqual(message.uploadAttempts, 1);
 
 				done();
 			});

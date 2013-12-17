@@ -5,6 +5,7 @@ var async = require('async');
 var fs = require('fs');
 var knox = require('knox');
 var assert = require('assert');
+var fs = require('fs');
 
 var workerPath = path.resolve(__dirname, '..', 'worker.js');
 var testServerPath = path.join(__dirname, 'testServer.js');
@@ -32,6 +33,7 @@ process.on('message', function(msg) {
 });
 
 var TESTFILE = 'test/1';
+var LOCALFILE = TESTFILE.replace('/', '_');
 
 describe('zeros3', function () {
 
@@ -46,8 +48,8 @@ describe('zeros3', function () {
 			clearS3TestData,
 			forkTestServer,
 			forkZeroS3Worker,
-			instrumentTestServer,
-			verifyUpload,
+			tellTestServerToSendMessageToWorker,
+			verifyUpload
 		], testDone);
 
 		function testDone(err, services) {
@@ -57,6 +59,29 @@ describe('zeros3', function () {
 			} else {
 				assert.strictEqual(services.downloadedFile, testFileData);
 
+				teardown(services, done);
+			}
+		}
+	});
+
+	it('retries the upload when it fails', function (done) {
+		this.timeout(60000);
+
+		async.waterfall([
+			initTest,
+			clearLocalData,
+			forkTestServer,
+			forkFaultyZeroS3Worker,
+			tellTestServerToSendMessageToWorker,
+			verifyLocalData
+		], testDone);
+
+		function testDone(err, services) {
+			if (err) {
+				console.log(err);
+				done(err);
+			} else {
+				assert.strictEqual(services.downloadedFile, testFileData);
 				teardown(services, done);
 			}
 		}
@@ -89,9 +114,22 @@ function initTest(callback) {
 }
 
 /*
+
+*/
+function verifyLocalData(services, callback) {
+
+	fs.readFile(path.join(__dirname, LOCALFILE), 'utf8', function(err, data) {
+		services.downloadedFile = data
+		callback(err, services);
+	});
+}
+
+
+/*
 	download the file from s3 and compare to test file data
 */
 function verifyUpload(services, callback) {
+
 	s3Client.getFile(TESTFILE, function(err, res) {
 
 		services.downloadedFile = '';
@@ -121,10 +159,10 @@ function verifyUpload(services, callback) {
 }
 
 /*
-			tell our test server to send a message to the zero-s3 worker and wait 3 seconds
+	tell our test server to send a message to the zero-s3 worker and wait 3 seconds
 */
-function instrumentTestServer(services, callback) {
-	console.log('sending message to test server');
+function tellTestServerToSendMessageToWorker(services, callback) {
+	console.log('telling test server to send a message to zero s3 worker');
 	services.testServer.send({ method: 'sendMessage', params: [ config.aws.bucket, TESTFILE ] });
 	setTimeout(function () {
 		callback(null, services);
@@ -144,13 +182,35 @@ function forkZeroS3Worker(services, callback) {
 }
 
 /*
+	fork a faulty zero-s3 worker
+	then wait another second
+*/
+function forkFaultyZeroS3Worker(services, callback) {
+	var configPath = path.join(__dirname, 'faultyClientConfig.json');
+//	configPath = 'faultyClientConfig.json';
+	console.log('forking faulty zero s3 (%s)', configPath);
+	services.zeros3Worker = fork(workerPath, ['--clientType', 'faulty', '--faulty.failures', 1, '--uploadAttempts', 2, '--faulty.directory', __dirname]);
+	setTimeout(function () {
+		callback(null, services);
+	}, 1000);
+}
+
+
+/*
 	fork a test server zero-s3 can connect using zmq
 */
 function forkTestServer(services, callback) {
 	console.log('forking test server');
 	services.testServer = fork(testServerPath);
+
 	setTimeout(function () {
-		callback(null, services);
+
+		services.testServer.send({ method: 'init' });
+
+		setTimeout(function () {
+			callback(null, services);
+		}, 1000);
+
 	}, 1000);
 }
 
@@ -159,16 +219,32 @@ function forkTestServer(services, callback) {
 */
 function clearS3TestData(services, callback) {
 	console.log('clearing s3 test data');
+
+	function success() {
+		callback(null, services);
+	}
+
 	s3Client.deleteFile(TESTFILE, function(err, res) {
 
 		if (err) callback(err);
 		else if (res.statusCode.toString().substr(0, 2) !== '20')
 			callback('response status code: ' + res.statusCode);
 		else
-			callback(null, services);
+			success();
 	});
 }
 
-function fork(what) {
-	return child.fork(what, process.argv.slice(2),  { cwd: process.cwd() });
+function clearLocalData(services, callback) {
+	console.log('clearing local data');
+
+	fs.unlink(path.join(__dirname, LOCALFILE), function (err) {
+		if (err) callback(err);
+		else callback(null, services);
+	});
+}
+
+
+
+function fork(what, args) {
+	return child.fork(what, process.argv.slice(3).concat(args),  { cwd: process.cwd() });
 }
