@@ -25,10 +25,10 @@ function putCallback(err, res, message) {
 		printResponse(res);
 
 		if (message.uploadAttempts <= config.uploadAttempts) {
-			console.warn('retrying upload');
+			console.warn('retrying upload %s (%s/%s)', message.payload.key, message.uploadAttempts, config.uploadAttempts);
 			upload(message);
 		} else {
-			console.warn('failed to upload message');
+			console.warn('failed to upload message %s', message.payload.key);
 		}
 	}
 }
