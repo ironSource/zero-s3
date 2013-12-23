@@ -2,7 +2,7 @@
 
 receive upload messages via zmq push/pull
 
-### Config
+## Config
 
 ```
 // .zero-s3rc:
@@ -23,9 +23,6 @@ receive upload messages via zmq push/pull
 // .s3shieldrc:
 
 {
-	// knox or faulty
-	"clientType": "knox",
-
 	// aws config
 	"aws": {
 		"region": "us-standard",

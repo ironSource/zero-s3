@@ -1,6 +1,5 @@
 var zmq = require('zmq');
 var path = require('path');
-var Messaging = require('forkraft').Messaging;
 var $u = require('util');
 
 var outgoingWorkChannel = zmq.socket('push');

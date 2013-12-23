@@ -9,7 +9,7 @@ var fs = require('fs');
 var fork = require('./fork.js');
 
 var workerPath = path.resolve(__dirname, '..', 'worker.js');
-var testServerPath = path.join(__dirname, 'testServer.js');
+var testServerPath = path.join(__dirname, 'lib', 'dummyServer.js');
 
 var testFunction = describe;
 
@@ -19,7 +19,7 @@ if (config.aws.accessKeyId === undefined || config.aws.secretAccessKey === undef
 	console.warn('skipping integration test because no aws credentials were supplied');
 }
 
-var testFileData = fs.readFileSync(path.join(__dirname, 'uploadtestfile'), 'utf8');
+var testFileData = fs.readFileSync(path.join(__dirname, 'lib', 'uploadtestfile'), 'utf8');
 
 var s3Client = knox.createClient({
     key: 		config.aws.accessKeyId,
@@ -35,6 +35,7 @@ process.on('message', function(msg) {
 
 var TESTFILE = 'test/1';
 var LOCALFILE = TESTFILE.replace('/', '_');
+var localFilePath = path.join(__dirname, 'lib', LOCALFILE);
 
 describe('zeros3', function () {
 
@@ -119,7 +120,7 @@ function initTest(callback) {
 */
 function verifyLocalData(services, callback) {
 
-	fs.readFile(path.join(__dirname, LOCALFILE), 'utf8', function(err, data) {
+	fs.readFile(localFilePath, 'utf8', function(err, data) {
 		services.downloadedFile = data
 		callback(err, services);
 	});
@@ -176,7 +177,7 @@ function tellTestServerToSendMessageToWorker(services, callback) {
 */
 function forkZeroS3Worker(services, callback) {
 	console.log('forking zero s3');
-	services.zeros3Worker = fork(workerPath);
+	services.zeros3Worker = fork(workerPath, process.cwd());
 	setTimeout(function () {
 		callback(null, services);
 	}, 1000);
@@ -190,7 +191,7 @@ function forkFaultyZeroS3Worker(services, callback) {
 	var configPath = path.join(__dirname, 'faultyClientConfig.json');
 //	configPath = 'faultyClientConfig.json';
 	console.log('forking faulty zero s3 (%s)', configPath);
-	services.zeros3Worker = fork(workerPath, ['--clientType', 'faulty', '--faulty.failures', 1, '--uploadAttempts', 2, '--faulty.directory', __dirname]);
+	services.zeros3Worker = fork(workerPath, process.cwd(), ['--clientType', 'faulty', '--faulty.failures', 1, '--uploadAttempts', 2, '--faulty.directory', __dirname]);
 	setTimeout(function () {
 		callback(null, services);
 	}, 1000);
@@ -201,8 +202,8 @@ function forkFaultyZeroS3Worker(services, callback) {
 	fork a test server zero-s3 can connect using zmq
 */
 function forkTestServer(services, callback) {
-	console.log('forking test server');
-	services.testServer = fork(testServerPath);
+	console.log('forking test server at %s', testServerPath);
+	services.testServer = fork(testServerPath, process.cwd());
 
 	setTimeout(function () {
 
@@ -238,8 +239,12 @@ function clearS3TestData(services, callback) {
 function clearLocalData(services, callback) {
 	console.log('clearing local data');
 
-	fs.unlink(path.join(__dirname, LOCALFILE), function (err) {
-		if (err) callback(err);
-		else callback(null, services);
+	fs.exists(localFilePath, function (exists) {
+		if (exists)	{
+			fs.unlink(filename, function (err) {
+				if (err) callback(err);
+				else callback(null, services);
+			});
+		}
 	});
 }
