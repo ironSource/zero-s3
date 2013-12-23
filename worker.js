@@ -1,11 +1,13 @@
 var zmq = require('zmq');
+var s3shield = require('s3shield');
 var config = require('./lib/config.js');
 var $u = require('util');
-var Message = require('./lib/Message.js');
+var Message = s3shield.Message;
 var http = require('http');
 var decrypt = require('./lib/decrypt.js');
-var S3ClientProviderSelector = require('./lib/S3ClientProviderSelector.js');
+var S3ClientProviderSelector = s3shield.S3ClientProviderSelector;
 var domain = require('domain');
+var config = require('./lib/config.js');
 
 var incomingChannel = zmq.socket('pull');
 incomingChannel.identity = 'zero-s3' + process.pid;
@@ -18,7 +20,7 @@ for (var i = 0; i < config.fileLoggers.length; i++) {
 console.log('zero-s3 client provider is %s', config.clientType);
 
 var ClientProviderClass = S3ClientProviderSelector.get(config.clientType);
-var clientProvider = new ClientProviderClass(config);
+var clientProvider = new ClientProviderClass(s3shield.config);
 
 function putCallback(err, res, message) {
 	if (err) {
@@ -46,7 +48,7 @@ function handleMessage(payload) {
 	}
 }
 
-function upload (message) {
+function upload(message) {
 	var client = clientProvider.get(message.payload.bucket);
 	message.upload(client, putCallback);
 }

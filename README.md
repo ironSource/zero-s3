@@ -10,21 +10,28 @@ receive upload messages via zmq push/pull
 	// knox or faulty
 	"clientType": "knox",
 
+	// list of message senders to connect to (pull side of zmq push/pull socket)
+	"fileLoggers": [
+		"tcp://127.0.0.1:5003"
+	],
+
+	// how many times to try an upload before giving up
+	"uploadAttempts": 5
+}
+```
+```
+// .s3shieldrc:
+
+{
+	// knox or faulty
+	"clientType": "knox",
+
 	// aws config
 	"aws": {
 		"region": "us-standard",
 		"accessKeyId": "your access key",
 		"secretAccessKey": "your secret"
 	},
-
-	// if specified will try to decrypt messages using aes128
-	"password": "shhhhhhhh",
-
-	// list of message senders to connect to (pull side of zmq push/pull socket)
-	"fileLoggers": [
-		"tcp://127.0.0.1:5003"
-	],
-
 
 	// see lru-cache for all the options
 	// used by knox client provider to catch a client per bucket
@@ -50,9 +57,6 @@ receive upload messages via zmq push/pull
 	// in put() functions where a string or an object is provided (and not a buffer) this enconding
 	// will be used when turning the data into a buffer
 	"uploadEncoding": "utf8",
-
-	// how many times to try an upload before giving up
-	"uploadAttempts": 5,
 
 	// "faulty s3 client is used for testing"
 	"faulty": {

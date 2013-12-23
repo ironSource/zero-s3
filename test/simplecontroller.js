@@ -1,6 +1,6 @@
 //used to manually instrument the test server (not through a mocha test)
 var fork = require('./fork');
-var config = require('../lib/config.js');
+var config = require('s3shield').config;
 var testServer = fork('testServer');
 
 testServer.send({ method: 'init'});

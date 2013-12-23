@@ -1,4 +1,4 @@
-var config = require('../lib/config.js');
+var config = require('s3shield').config;
 var child = require('child_process');
 var path = require('path');
 var async = require('async');
@@ -65,7 +65,7 @@ describe('zeros3', function () {
 		}
 	});
 
-	it.skip('retries the upload when it fails', function (done) {
+	it('retries the upload when it fails', function (done) {
 		this.timeout(60000);
 
 		async.waterfall([
