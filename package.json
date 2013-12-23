@@ -1,6 +1,6 @@
 {
   "name": "zero-s3",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "description": "zmq+http to s3 upload",
   "main": "index.js",
   "bin": {
