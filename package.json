@@ -34,7 +34,7 @@
     "lodash": "~2.2.1",
     "async": "~0.2.9",
     "simple-file-writer": "~1.0.9",
-    "s3shield": "0.0.5"
+    "s3shield": "0.0.9"
   },
   "devDependencies": {
     "knox": "~0.8.8"

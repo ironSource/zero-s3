@@ -35,7 +35,7 @@ process.on('message', function(msg) {
 
 var TESTFILE = 'test/1';
 var LOCALFILE = TESTFILE.replace('/', '_');
-var localFilePath = path.join(__dirname, 'lib', LOCALFILE);
+var LOCAL_FILE_PATH = path.join(__dirname, LOCALFILE);
 
 describe('zeros3', function () {
 
@@ -120,7 +120,7 @@ function initTest(callback) {
 */
 function verifyLocalData(services, callback) {
 
-	fs.readFile(localFilePath, 'utf8', function(err, data) {
+	fs.readFile(LOCAL_FILE_PATH, 'utf8', function(err, data) {
 		services.downloadedFile = data
 		callback(err, services);
 	});
@@ -188,9 +188,7 @@ function forkZeroS3Worker(services, callback) {
 	then wait another second
 */
 function forkFaultyZeroS3Worker(services, callback) {
-	var configPath = path.join(__dirname, 'faultyClientConfig.json');
-//	configPath = 'faultyClientConfig.json';
-	console.log('forking faulty zero s3 (%s)', configPath);
+
 	services.zeros3Worker = fork(workerPath, process.cwd(), ['--clientType', 'faulty', '--faulty.failures', 1, '--uploadAttempts', 2, '--faulty.directory', __dirname]);
 	setTimeout(function () {
 		callback(null, services);
@@ -239,12 +237,14 @@ function clearS3TestData(services, callback) {
 function clearLocalData(services, callback) {
 	console.log('clearing local data');
 
-	fs.exists(localFilePath, function (exists) {
+	fs.exists(LOCAL_FILE_PATH, function (exists) {
 		if (exists)	{
-			fs.unlink(filename, function (err) {
+			fs.unlink(LOCAL_FILE_PATH, function (err) {
 				if (err) callback(err);
 				else callback(null, services);
 			});
+		} else {
+			callback(null, services);
 		}
 	});
 }
