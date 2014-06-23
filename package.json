@@ -7,7 +7,7 @@
     "zero-s3": "./zero-s3.js"
   },
   "scripts": {
-    "test": "mocha"
+    "test": "mocha -R spec"
   },
   "repository": {
     "type": "git",
@@ -25,16 +25,16 @@
     "url": "https://github.com/ironsource/zero-s3/issues"
   },
   "dependencies": {
-    "rc": "~0.3.1",
-    "zmq": "~2.5.1",
-    "knox": "~0.8.8",
-    "optimist": "~0.6.0",
-    "lru-cache": "~2.3.1",
-    "forkraft": "~1.1.10",
-    "lodash": "~2.2.1",
     "async": "~0.2.9",
+    "forkraft": "~1.1.10",
+    "knox": "~0.8.8",
+    "lodash": "~2.2.1",
+    "lru-cache": "~2.3.1",
+    "optimist": "~0.6.0",
+    "rc": "~0.3.1",
+    "s3shield": "0.0.23",
     "simple-file-writer": "~1.0.9",
-    "s3shield": "0.0.9"
+    "zmq": "~2.5.1"
   },
   "devDependencies": {
     "knox": "~0.8.8"

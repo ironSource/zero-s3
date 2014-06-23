@@ -13,6 +13,8 @@ var testServerPath = path.join(__dirname, 'lib', 'dummyServer.js');
 
 var testFunction = describe;
 
+//TODO: lots of refactoring needs to be done on this test
+
 if (config.aws.accessKeyId === undefined || config.aws.secretAccessKey === undefined) {
 
 	testFunction = describe.skip;
@@ -37,7 +39,13 @@ var TESTFILE = 'test/1';
 var LOCALFILE = TESTFILE.replace('/', '_');
 var LOCAL_FILE_PATH = path.join(__dirname, LOCALFILE);
 
+var services
+
 describe('zeros3', function () {
+
+	afterEach(function(done) {
+		teardown(services, done)
+	})
 
 	/*
 		test sends a message to the test server, which sends a message through zeromq to the zero-s3 worker
@@ -60,8 +68,7 @@ describe('zeros3', function () {
 				done(err);
 			} else {
 				assert.strictEqual(services.downloadedFile, testFileData);
-
-				teardown(services, done);
+				done()
 			}
 		}
 	});
@@ -84,7 +91,8 @@ describe('zeros3', function () {
 				done(err);
 			} else {
 				assert.strictEqual(services.downloadedFile, testFileData);
-				teardown(services, done);
+				//teardown(services, done);
+				done()
 			}
 		}
 	});
@@ -96,13 +104,17 @@ function teardown(services, done) {
 	services.testServer.kill();
 
 	function killWorker(callback) {
-		services.zeros3Worker.on('close', callback);
-		console.log('worker closed');
+		services.zeros3Worker.on('close', function (exitCode, signal) {			
+			console.log('worker closed %s, %s', exitCode, signal);
+			callback()
+		});
 	}
 
 	function killServer(callback) {
-		services.testServer.on('close', callback);
-		console.log('server closed');
+		services.testServer.on('close', function (exitCode, signal) {			
+			console.log('server closed %s, %s', exitCode, signal);
+			callback()
+		});
 	}
 
 	async.parallel([
@@ -112,7 +124,8 @@ function teardown(services, done) {
 }
 
 function initTest(callback) {
-	callback(null, {});
+	services = {}
+	callback(null, services);
 }
 
 /*
