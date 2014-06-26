@@ -52,7 +52,7 @@ describe('Message', function () {
 		it('increment upload attemps counter when upload fails', function (done) {
 			var client = new Mock();
 
-			client.put = function(k, d, c) {
+			client.put = function(k, d, m, c) {
 				c('error!');
 			};
 
@@ -74,12 +74,12 @@ function Mock() {
 	this.invocations = [];
 }
 
-Mock.prototype.put = function(key, data, callback) {
+Mock.prototype.put = function(key, data, maxAttempts, callback) {
 	this.invocations.push(['put', arguments]);
 	callback(null);
 };
 
-Mock.prototype.putFile = function(key, path, callback) {
+Mock.prototype.putFile = function(key, path, maxAttempts, callback) {
 	this.invocations.push(['putFile', arguments]);
 	callback(null);
 };

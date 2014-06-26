@@ -145,7 +145,7 @@ function verifyLocalData(services, callback) {
 */
 function verifyUpload(services, callback) {
 
-	s3Client.getFile(TESTFILE, function(err, res) {
+	s3Client.getFile(TESTFILE, function (err, res) {
 
 		services.downloadedFile = '';
 
