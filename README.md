@@ -1,3 +1,5 @@
+# DEPRECATED!
+
 # zero-s3
 
 receive upload messages via zmq push/pull
